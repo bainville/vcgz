@@ -11,9 +11,14 @@ url = "https://www.youtube.com/c/JLMelenchon/videos"
 url = "https://www.youtube.com/watch?v=D30s3Yzb4Vc"
 
 
-class Video:
-    def __init__(self):
-        pass
+# TODO implement me and test me
+def getContentFromSubTitleFile(video_id: str) -> str:
+    pass
+
+
+class VideoDataExtractor:
+    def __init__(self, video_id):
+        self.parse(video_id)
 
     def getSubtitle() -> str:
         pass
@@ -24,7 +29,7 @@ class Video:
     def getPersonalityName() -> str:
         pass
 
-    def parse(download_data_id: str):
+    def parse(video_id: str):
         pass
 
 
@@ -39,7 +44,9 @@ class Source:
 
     def proceed(self):
         self.get_all_video_in_channel()
-        self.list_newly_download_id()
+        for video_id in self.list_newly_download_id():
+            print(f"Extracting information for video id: {video_id}")
+            extractor = VideoDataExtractor(video_id)
 
     def list_newly_download_id(self):
         all_files = [
@@ -79,5 +86,6 @@ class Source:
         spc.communicate()
         spc.wait()
 
-melanchon=Source("Melanchon",url)
+
+melanchon = Source("Melanchon", url)
 melanchon.proceed()
