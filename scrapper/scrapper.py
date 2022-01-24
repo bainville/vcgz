@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+from distutils.command.clean import clean
+from hashlib import new
+from re import sub
 import urllib
 import json
 import subprocess
@@ -8,6 +11,8 @@ from os.path import isfile, join
 from datetime import datetime
 from os import listdir
 from os.path import isfile, join
+import re  
+
 
 url = "https://www.youtube.com/c/JLMelenchon/videos"
 url = "https://www.youtube.com/watch?v=D30s3Yzb4Vc"
@@ -17,12 +22,16 @@ url = "https://www.youtube.com/watch?v=D30s3Yzb4Vc"
 def getContentFromSubTitleFile(video_id: str) -> str:
     pass
 
+def isContinuationOfLastLine(lastline:str, newline:str)->bool:
+    return lastline.rstrip(" ")==newline.split(" ")[0]
+
 class VideoDataExtractor:
     def __init__(self, video_id):
         self.__parse(video_id)
 
     def getSubtitle(self) -> str:
-        pass
+        print(self.subtitle)
+        return self.subtitle.lstrip(" ")
 
     def getDate(self) -> datetime:
         return self.upload_date
@@ -42,7 +51,26 @@ class VideoDataExtractor:
         except Exception as e:
             print (e)
 
-
+    def __parse_subtitle(self,subtitle_filename:str)->None:
+        self.subtitle=str()
+        line=str()
+        one_line_before=str()
+        two_line_before=str()
+        content = [content_line.rstrip('\n').rstrip(" ") for content_line in open(subtitle_filename)]
+        for content_line in content[3:]:
+            two_line_before=one_line_before
+            one_line_before=line
+            if len(content_line)>0 and not "-->" in content_line:
+                clean_content=re.sub(r'\<.*\>',r'',content_line)
+                # print(f"{clean_content} ")
+                if clean_content==one_line_before:
+                    continue 
+                line=clean_content
+                if not isContinuationOfLastLine(one_line_before,line):
+                    self.subtitle=self.subtitle+" "+one_line_before
+        self.subtitle=self.subtitle+" "+line
+            
+        
 
     def __parse(self, video_id: str):
         all_files = [f for f in listdir(os.getcwd()) if isfile(join(os.getcwd(), f))]
@@ -52,8 +80,7 @@ class VideoDataExtractor:
                 json_filename=filename.rstrip('.fr.vtt')+'.info.json'
                 description_filename=filename.rstrip('.fr.vtt')+'.description'
                 self.__parse_json_file(json_filename)
-                print(json_filename)
-                print(description_filename)
+                self.__parse_subtitle(filename)
                 break
 
 
@@ -71,7 +98,9 @@ class Source:
         for video_id in self.list_newly_download_id():
             print(f"Extracting information for video id: {video_id}")
             extractor = VideoDataExtractor(video_id)
-
+            print(extractor.getSubtitle())
+            print (f"Video was from {extractor.getPersonalityName()}")
+            
     def list_newly_download_id(self):
         all_files = [
             filename
