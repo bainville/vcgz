@@ -5,7 +5,9 @@ import subprocess
 import os
 from os import listdir
 from os.path import isfile, join
-
+from datetime import datetime
+from os import listdir
+from os.path import isfile, join
 
 url = "https://www.youtube.com/c/JLMelenchon/videos"
 url = "https://www.youtube.com/watch?v=D30s3Yzb4Vc"
@@ -15,22 +17,34 @@ url = "https://www.youtube.com/watch?v=D30s3Yzb4Vc"
 def getContentFromSubTitleFile(video_id: str) -> str:
     pass
 
-
 class VideoDataExtractor:
     def __init__(self, video_id):
-        self.parse(video_id)
+        self.__parse(video_id)
 
-    def getSubtitle() -> str:
+    def getSubtitle(self) -> str:
         pass
 
-    def getDate() -> str:
+    def getDate(self) -> datetime:
         pass
 
-    def getPersonalityName() -> str:
+    def getPersonalityName(self) -> str:
+        return self.personalityname
+
+    def __parse_json_file(self,json_filename:str)->None:
         pass
 
-    def parse(video_id: str):
-        pass
+
+    def __parse(self, video_id: str):
+        all_files = [f for f in listdir(os.getcwd()) if isfile(join(os.getcwd(), f))]
+        for filename in all_files:
+            if video_id in filename and ".fr.vtt" in filename :
+                self.personalityname=filename.rstrip(f'-{video_id}.fr.vtt')
+                json_filename=filename.rstrip('.fr.vtt')+'.info.json'
+                description_filename=filename.rstrip('.fr.vtt')+'.description'
+                self.__parse_json_file(json_filename)
+                print(json_filename)
+                print(description_filename)
+                break
 
 
 class Source:
@@ -65,27 +79,35 @@ class Source:
         return only_ids
 
     def get_all_video_in_channel(self):
+        command = [
+            "youtube-dl",
+            "--skip-download",
+            "--write-annotations",
+            "--write-description",
+            "--write-info-json",
+            "--no-overwrite",
+            "--download-archive",
+            "--write-info-json",
+            "--write-auto-sub",
+            "--sub-lang=fr",
+            "--output",
+            f"{self.personality_name}-%(id)s",
+            self.channel_url,
+        ]
+        print(" ".join(command))
+
         spc = subprocess.Popen(
-            [
-                "youtube-dl",
-                "--skip-download",
-                "--write-annotations",
-                "--write-description",
-                "--write-info-json",
-                "--no-overwrite",
-                "--download-archive",
-                "--write-info-json",
-                "--write-sub",
-                "--write-auto-sub",
-                "--output",
-                f"{self.personality_name}-%(id)s",
-                self.channel_url,
-            ],
+            command,
             stdout=subprocess.PIPE,
         )
         spc.communicate()
         spc.wait()
 
 
-melanchon = Source("Melanchon", url)
-melanchon.proceed()
+def main():
+    melanchon = Source("Melanchon", url)
+    melanchon.proceed()
+
+
+if __name__ == "__main__":
+    main()
