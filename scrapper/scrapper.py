@@ -25,13 +25,23 @@ class VideoDataExtractor:
         pass
 
     def getDate(self) -> datetime:
-        pass
+        return self.upload_date
 
     def getPersonalityName(self) -> str:
         return self.personalityname
 
     def __parse_json_file(self,json_filename:str)->None:
-        pass
+        json_file=open(json_filename)
+        data=json.load(json_file)
+        try: 
+            date_string=data['upload_date']
+            year=date_string[0:4]
+            month=date_string[4:6]
+            day=date_string[6:8]
+            self.upload_date=datetime(int(year),int(month),int(day))
+        except Exception as e:
+            print (e)
+
 
 
     def __parse(self, video_id: str):
