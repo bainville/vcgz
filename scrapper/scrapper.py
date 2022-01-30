@@ -8,7 +8,6 @@ import subprocess
 import os
 from os import listdir
 from os.path import isfile, join
-from datetime import datetime
 from os import listdir
 from os.path import isfile, join
 import re  
@@ -18,16 +17,14 @@ url = "https://www.youtube.com/c/JLMelenchon/videos"
 url = "https://www.youtube.com/watch?v=D30s3Yzb4Vc"
 
 
-# TODO implement me and test me
-def getContentFromSubTitleFile(video_id: str) -> str:
-    pass
+KEYS_FROM_JSON=['title','duration','channel','view_count','average_rating','upload_date','fulltitle','tags','categories','playlist','playlist_title']
 
 def isContinuationOfLastLine(lastline:str, newline:str)->bool:
     return lastline.rstrip(" ")==newline.split(" ")[0]
 
 def initializeData()->dict:
     data=dict()
-    for key in ['video_id','personality_name','subtitle','title','duration','channel','view_count','average_rating','upload_date','fulltitle','tags','categories','playlist','playlist_title']:
+    for key in ['video_id','personality_name','subtitle']+KEYS_FROM_JSON:
         data[key]=""
     return data
 
@@ -37,30 +34,17 @@ class VideoDataExtractor:
         self.data['video_id']=video_id
         self.__parse(video_id)
 
-
     def getData(self)->dict: 
         return self.data
-
-    def getSubtitle(self) -> str:
-        return self.subtitle.lstrip(" ")
-
-    def getDate(self) -> datetime:
-        return self.upload_date
-
-    def getPersonalityName(self) -> str:
-        return self.personalityname
 
     def __parse_json_file(self,json_filename:str)->None:
         json_file=open(json_filename)
         data=json.load(json_file)
-        try: 
-            date_string=data['upload_date']
-            year=date_string[0:4]
-            month=date_string[4:6]
-            day=date_string[6:8]
-            self.upload_date=datetime(int(year),int(month),int(day))
-        except Exception as e:
-            print (e)
+        for key in KEYS_FROM_JSON:
+            try: 
+                self.data[key]=data[key]
+            except Exception as e: 
+                print(e)
 
     def __parse_subtitle(self,subtitle_filename:str)->None:
         subtitle=str()
@@ -79,14 +63,12 @@ class VideoDataExtractor:
         subtitle=subtitle+" "+line
         subtitle=subtitle.lstrip(" ")
         self.data['subtitle']=subtitle
-            
-        
 
     def __parse(self, video_id: str):
         all_files = [f for f in listdir(os.getcwd()) if isfile(join(os.getcwd(), f))]
         for filename in all_files:
             if video_id in filename and ".fr.vtt" in filename :
-                self.personalityname=filename.rstrip(f'-{video_id}.fr.vtt')
+                self.data['personality_name']=filename.rstrip(f'-{video_id}.fr.vtt')
                 json_filename=filename.rstrip('.fr.vtt')+'.info.json'
                 description_filename=filename.rstrip('.fr.vtt')+'.description'
                 self.__parse_json_file(json_filename)
