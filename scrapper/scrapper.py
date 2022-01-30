@@ -1,19 +1,10 @@
 #!/usr/bin/env python3
-from curses import meta
-from shutil import ExecError
-import sys
 import inspect 
-from distutils.command.clean import clean
-from hashlib import new
-from re import sub
 import json
 import subprocess
 import os
 from os import listdir
 from os.path import isfile, join
-from os import listdir
-from os.path import isfile, join
-import re  
 import argparse
 import yaml
 
@@ -21,9 +12,6 @@ from database_inserter import DatabaseInserter
 
 
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-
-url = "https://www.youtube.com/c/JLMelenchon/videos"
-url = "https://www.youtube.com/watch?v=D30s3Yzb4Vc"
 
 
 KEYS_FROM_JSON=['title','duration','channel','view_count','average_rating','upload_date','fulltitle','tags','categories','playlist','playlist_title']
@@ -37,6 +25,20 @@ def initializeData()->dict:
         data[key]=""
     return data
 
+def getCleanedContent(content:str)->str: 
+    clean=str()
+    if not '<' in content: 
+        return content
+    for part in content.split('<'):
+        if not '>' in part:
+            clean=part
+            continue
+        subparts=part.split('>')
+        if len(subparts)>0:
+            clean=clean+subparts[1]
+    return clean
+
+
 
 class InputReader:
     def __init__(self,yaml_input_file):
@@ -45,8 +47,6 @@ class InputReader:
         with open(yaml_input_file, 'r') as stream:
             self.data=yaml.safe_load(stream)
             
-                
-
 class VideoDataExtractor:
     def __init__(self, video_id,query_url):
         self.data=initializeData()
@@ -70,15 +70,17 @@ class VideoDataExtractor:
         subtitle=str()
         line=str()
         one_line_before=str()
+        two_line_before=str()
         content = [content_line.rstrip('\n').rstrip(" ") for content_line in open(subtitle_filename)]
         for content_line in content[3:]:
+            two_line_before=one_line_before
             one_line_before=line
             if len(content_line)>0 and not "-->" in content_line:
-                clean_content=re.sub(r'\<.*\>',r'',content_line)
+                clean_content=getCleanedContent(content_line)
                 if clean_content==one_line_before:
                     continue 
                 line=clean_content
-                if not isContinuationOfLastLine(one_line_before,line):
+                if not isContinuationOfLastLine(one_line_before,line) and not isContinuationOfLastLine(two_line_before,line):
                     subtitle=subtitle+" "+one_line_before
         subtitle=subtitle+" "+line
         subtitle=subtitle.lstrip(" ")

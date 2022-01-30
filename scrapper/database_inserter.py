@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 import pymongo 
-import urllib3
 import urllib
-
-
-
 
 class DatabaseInserter:
     def __init__(self):

@@ -1,8 +1,8 @@
+#!/usr/bin/env python3
 import os
 import sys
 import inspect
 import shutil
-import pytest
 
 
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -12,6 +12,7 @@ sys.path.insert(0, parentdir)
 from scrapper import VideoDataExtractor
 from scrapper import isContinuationOfLastLine
 from scrapper import initializeData
+from scrapper import getCleanedContent
 
 
 TEST_FILES=["Melanchon-D30s3Yzb4Vc.description","Melanchon-D30s3Yzb4Vc.fr.vtt","Melanchon-D30s3Yzb4Vc.info.json"]
@@ -86,6 +87,10 @@ def testDataExtaction():
 
     assert (checkTestFilesDeleted())
 
+
+def testgetCleanContent():
+    assert(getCleanedContent("convaincre est-ce que ce pass vaccinale")=="convaincre est-ce que ce pass vaccinale")
+    assert(getCleanedContent("convaincre<00:00:12.929><c> est-ce</c><00:00:13.110><c> que</c><00:00:13.290><c> ce</c><00:00:13.559><c> pass</c><00:00:13.889><c> vaccinale</c>")=="convaincre est-ce que ce pass vaccinale")
 
 
 def testisContinuationOfLastLine():
