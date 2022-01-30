@@ -142,8 +142,8 @@ class Source:
 
 def main():
     database_inserter=DatabaseInserter()
-    melanchon = Source("Melanchon", url)
-    extracted_metadata=melanchon.proceed()
+    source = Source("Melanchon", url)
+    extracted_metadata=source.proceed()
     for metadata in extracted_metadata:
         database_inserter.insertVideoRecord(metadata)
 
