@@ -25,9 +25,21 @@ def getContentFromSubTitleFile(video_id: str) -> str:
 def isContinuationOfLastLine(lastline:str, newline:str)->bool:
     return lastline.rstrip(" ")==newline.split(" ")[0]
 
+def initializeData()->dict:
+    data=dict()
+    for key in ['video_id','personality_name','subtitle','title','duration','channel','view_count','average_rating','upload_date','fulltitle','tags','categories','playlist','playlist_title']:
+        data[key]=""
+    return data
+
 class VideoDataExtractor:
     def __init__(self, video_id):
+        self.data=initializeData()
+        self.data['video_id']=video_id
         self.__parse(video_id)
+
+
+    def getData(self)->dict: 
+        return self.data
 
     def getSubtitle(self) -> str:
         return self.subtitle.lstrip(" ")
@@ -65,6 +77,7 @@ class VideoDataExtractor:
                 if not isContinuationOfLastLine(one_line_before,line):
                     self.subtitle=self.subtitle+" "+one_line_before
         self.subtitle=self.subtitle+" "+line
+        self.subtitle=self.subtitle.lstrip(" ")
             
         
 
@@ -76,7 +89,7 @@ class VideoDataExtractor:
                 json_filename=filename.rstrip('.fr.vtt')+'.info.json'
                 description_filename=filename.rstrip('.fr.vtt')+'.description'
                 self.__parse_json_file(json_filename)
-                self.__parse_subtitle(description_filename)
+                self.__parse_subtitle(filename)
                 break
 
 

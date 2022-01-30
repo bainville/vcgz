@@ -1,3 +1,5 @@
 requests
 youtube_dl
 pytest
+pymongo
+urllib3
