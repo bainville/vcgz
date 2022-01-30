@@ -28,7 +28,7 @@ def testSubtitleExtraction():
     video_id="D30s3Yzb4Vc"
     unit=VideoDataExtractor(video_id)
     expected_subtitle="bonjour jean luc mélenchon merci beaucoup d'avoir accepté notre invitation vous êtes à fort-de-france où martin et que vous étiez d'ailleurs en guadeloupe ces derniers jours les départements d'outre-mer où la vaccination a du mal à convaincre est-ce que ce pass vaccinale annoncée pourrait changer les choses je crains que ça ne fasse que tout aggravé car ici on en a été à avoir des charges de police dans l'hôpital c'est"
-    assert(unit.getSubtitle()==expected_subtitle)   
+    assert(unit.getData()['subtitle']==expected_subtitle)
 
 
 def testisContinuationOfLastLine():

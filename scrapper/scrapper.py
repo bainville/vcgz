@@ -63,7 +63,7 @@ class VideoDataExtractor:
             print (e)
 
     def __parse_subtitle(self,subtitle_filename:str)->None:
-        self.subtitle=str()
+        subtitle=str()
         line=str()
         one_line_before=str()
         content = [content_line.rstrip('\n').rstrip(" ") for content_line in open(subtitle_filename)]
@@ -75,9 +75,10 @@ class VideoDataExtractor:
                     continue 
                 line=clean_content
                 if not isContinuationOfLastLine(one_line_before,line):
-                    self.subtitle=self.subtitle+" "+one_line_before
-        self.subtitle=self.subtitle+" "+line
-        self.subtitle=self.subtitle.lstrip(" ")
+                    subtitle=subtitle+" "+one_line_before
+        subtitle=subtitle+" "+line
+        subtitle=subtitle.lstrip(" ")
+        self.data['subtitle']=subtitle
             
         
 
