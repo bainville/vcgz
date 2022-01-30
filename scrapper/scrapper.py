@@ -76,7 +76,7 @@ class VideoDataExtractor:
                 json_filename=filename.rstrip('.fr.vtt')+'.info.json'
                 description_filename=filename.rstrip('.fr.vtt')+'.description'
                 self.__parse_json_file(json_filename)
-                self.__parse_subtitle(filename)
+                self.__parse_subtitle(description_filename)
                 break
 
 
