@@ -34,6 +34,7 @@ def testInitializeData():
         "video_id",
         "personality_name",
         "subtitle",
+        "query_url",
         "title",
         "duration",
         "channel",
@@ -51,7 +52,8 @@ def testInitializeData():
 def testDataExtaction():
     copyTestFiles()
     video_id = "D30s3Yzb4Vc"
-    unit = VideoDataExtractor(video_id)
+    url="https://www.youtube.com/watch?v=D30s3Yzb4Vc"
+    unit = VideoDataExtractor(video_id,url)
     expected_subtitle = "bonjour jean luc mélenchon merci beaucoup d'avoir accepté notre invitation vous êtes à fort-de-france où martin et que vous étiez d'ailleurs en guadeloupe ces derniers jours les départements d'outre-mer où la vaccination a du mal à convaincre est-ce que ce pass vaccinale annoncée pourrait changer les choses je crains que ça ne fasse que tout aggravé car ici on en a été à avoir des charges de police dans l'hôpital c'est"
     expected_data = initializeData()
     expected_data["video_id"]=video_id
@@ -60,6 +62,7 @@ def testDataExtaction():
     expected_data[
         "title"
     ] = "Le pass vaccinal va aggraver les tensions - M\u00e9lenchon sur TF1"
+    expected_data["query_url"]="https://www.youtube.com/watch?v=D30s3Yzb4Vc"
     expected_data["duration"] = 221
     expected_data["channel"] ="JEAN-LUC M\u00c9LENCHON"
     expected_data["view_count"] = 167322

@@ -33,7 +33,7 @@ def isContinuationOfLastLine(lastline:str, newline:str)->bool:
 
 def initializeData()->dict:
     data=dict()
-    for key in ['video_id','personality_name','subtitle']+KEYS_FROM_JSON:
+    for key in ['video_id','personality_name','subtitle','query_url']+KEYS_FROM_JSON:
         data[key]=""
     return data
 
@@ -48,9 +48,10 @@ class InputReader:
                 
 
 class VideoDataExtractor:
-    def __init__(self, video_id):
+    def __init__(self, video_id,query_url):
         self.data=initializeData()
         self.data['video_id']=video_id
+        self.data['query_url']=query_url
         self.__parse(video_id)
 
     def getData(self)->dict: 
