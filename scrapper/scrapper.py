@@ -30,7 +30,6 @@ class VideoDataExtractor:
         self.__parse(video_id)
 
     def getSubtitle(self) -> str:
-        print(self.subtitle)
         return self.subtitle.lstrip(" ")
 
     def getDate(self) -> datetime:
@@ -55,14 +54,11 @@ class VideoDataExtractor:
         self.subtitle=str()
         line=str()
         one_line_before=str()
-        two_line_before=str()
         content = [content_line.rstrip('\n').rstrip(" ") for content_line in open(subtitle_filename)]
         for content_line in content[3:]:
-            two_line_before=one_line_before
             one_line_before=line
             if len(content_line)>0 and not "-->" in content_line:
                 clean_content=re.sub(r'\<.*\>',r'',content_line)
-                # print(f"{clean_content} ")
                 if clean_content==one_line_before:
                     continue 
                 line=clean_content
@@ -98,7 +94,6 @@ class Source:
         for video_id in self.list_newly_download_id():
             print(f"Extracting information for video id: {video_id}")
             extractor = VideoDataExtractor(video_id)
-            print(extractor.getSubtitle())
             print (f"Video was from {extractor.getPersonalityName()}")
             
     def list_newly_download_id(self):
