@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+from curses import meta
+from shutil import ExecError
+import sys
+import inspect 
 from distutils.command.clean import clean
 from hashlib import new
 from re import sub
@@ -10,10 +14,13 @@ from os.path import isfile, join
 from os import listdir
 from os.path import isfile, join
 import re  
-
+import argparse
+import yaml
 
 from database_inserter import DatabaseInserter
 
+
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 
 url = "https://www.youtube.com/c/JLMelenchon/videos"
 url = "https://www.youtube.com/watch?v=D30s3Yzb4Vc"
@@ -29,6 +36,16 @@ def initializeData()->dict:
     for key in ['video_id','personality_name','subtitle']+KEYS_FROM_JSON:
         data[key]=""
     return data
+
+
+class InputReader:
+    def __init__(self,yaml_input_file):
+        if (not os.path.isfile(yaml_input_file)):
+            raise Exception(f"Input file not found {yaml_input_file}")
+        with open(yaml_input_file, 'r') as stream:
+            self.data=yaml.safe_load(stream)
+            
+                
 
 class VideoDataExtractor:
     def __init__(self, video_id):
@@ -98,8 +115,8 @@ class Source:
         for video_id in self.list_newly_download_id():
             print(f"Extracting information for video id: {video_id}")
             extractor = VideoDataExtractor(video_id)
-            print (f"Video was from {extractor.getPersonalityName()}")
             extracted_metadata.append(extractor.getData())
+            print (f"Video was from {extracted_metadata[-1]['personality_name']}")
 
         return extracted_metadata
             
@@ -147,12 +164,16 @@ class Source:
 
 def main():
     database_inserter=DatabaseInserter()
-    source = Source("Melanchon", url)
-    extracted_metadata=source.proceed()
-    for metadata in extracted_metadata:
-        database_inserter.insertVideoRecord(metadata)
-
-
+    parser = argparse.ArgumentParser(description="Get metadata from youtube video and insert them into the database")
+    parser.add_argument("-i", "--input", help="Just a flag argument" ,nargs='+',default=[os.path.join(currentdir,"input.yaml")])
+    args = parser.parse_args()
+    input = InputReader(args.input[0])
+    for key in input.data:
+        for url in input.data[key]:
+            source = Source(key, url)
+            extracted_metadata=source.proceed()
+            for metadata in extracted_metadata:
+                database_inserter.insertVideoRecord(metadata)
 
 if __name__ == "__main__":
     main()
