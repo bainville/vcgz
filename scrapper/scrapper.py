@@ -75,7 +75,12 @@ class VideoDataExtractor:
                 description_filename=filename.rstrip('.fr.vtt')+'.description'
                 self.__parse_json_file(json_filename)
                 self.__parse_subtitle(filename)
+                for f in [description_filename,json_filename,filename]:
+                    full_file_path=os.path.join(os.getcwd(),f)
+                    if (os.path.isfile(full_file_path)):
+                        os.remove(full_file_path)
                 break
+
 
 
 class Source:

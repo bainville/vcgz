@@ -1,6 +1,9 @@
 import os
 import sys
 import inspect
+import shutil
+import pytest
+
 
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
@@ -10,6 +13,20 @@ from scrapper import VideoDataExtractor
 from scrapper import isContinuationOfLastLine
 from scrapper import initializeData
 
+
+TEST_FILES=["Melanchon-D30s3Yzb4Vc.description","Melanchon-D30s3Yzb4Vc.fr.vtt","Melanchon-D30s3Yzb4Vc.info.json"]
+
+def copyTestFiles():
+    for testfile in TEST_FILES:
+        shutil.copyfile(os.path.join(currentdir,testfile), os.path.join(parentdir,testfile))
+
+
+def checkTestFilesDeleted()->bool:
+    for testfile in TEST_FILES:
+        if (os.path.isfile(os.path.join(parentdir,testfile))):
+            return False
+    return True
+    
 
 def testInitializeData():
     initialized_data = initializeData()
@@ -32,6 +49,7 @@ def testInitializeData():
         assert expected_key in initialized_data.keys()
 
 def testDataExtaction():
+    copyTestFiles()
     video_id = "D30s3Yzb4Vc"
     unit = VideoDataExtractor(video_id)
     expected_subtitle = "bonjour jean luc mélenchon merci beaucoup d'avoir accepté notre invitation vous êtes à fort-de-france où martin et que vous étiez d'ailleurs en guadeloupe ces derniers jours les départements d'outre-mer où la vaccination a du mal à convaincre est-ce que ce pass vaccinale annoncée pourrait changer les choses je crains que ça ne fasse que tout aggravé car ici on en a été à avoir des charges de police dans l'hôpital c'est"
@@ -62,6 +80,8 @@ def testDataExtaction():
     expected_data["playlist_title"]
 
     assert(unit.getData() == expected_data)
+
+    assert (checkTestFilesDeleted())
 
 
 
