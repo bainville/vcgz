@@ -2,7 +2,6 @@
 from distutils.command.clean import clean
 from hashlib import new
 from re import sub
-import urllib
 import json
 import subprocess
 import os
@@ -11,6 +10,9 @@ from os.path import isfile, join
 from os import listdir
 from os.path import isfile, join
 import re  
+
+
+from database_inserter import DatabaseInserter
 
 
 url = "https://www.youtube.com/c/JLMelenchon/videos"
@@ -87,10 +89,14 @@ class Source:
 
     def proceed(self):
         self.get_all_video_in_channel()
+        extracted_metadata=list()
         for video_id in self.list_newly_download_id():
             print(f"Extracting information for video id: {video_id}")
             extractor = VideoDataExtractor(video_id)
             print (f"Video was from {extractor.getPersonalityName()}")
+            extracted_metadata.append(extractor.getData())
+
+        return extracted_metadata
             
     def list_newly_download_id(self):
         all_files = [
@@ -135,8 +141,12 @@ class Source:
 
 
 def main():
+    database_inserter=DatabaseInserter()
     melanchon = Source("Melanchon", url)
-    melanchon.proceed()
+    extracted_metadata=melanchon.proceed()
+    for metadata in extracted_metadata:
+        database_inserter.insertVideoRecord(metadata)
+
 
 
 if __name__ == "__main__":
