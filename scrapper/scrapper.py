@@ -117,7 +117,7 @@ class Source:
         extracted_metadata=list()
         for video_id in self.list_newly_download_id():
             print(f"Extracting information for video id: {video_id}")
-            extractor = VideoDataExtractor(video_id)
+            extractor = VideoDataExtractor(video_id,self.channel_url)
             extracted_metadata.append(extractor.getData())
             print (f"Video was from {extracted_metadata[-1]['personality_name']}")
 
