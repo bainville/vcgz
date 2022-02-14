@@ -8,6 +8,8 @@ __pycache__/
 
 # Distribution / packaging
 .Python
+Zemmour/
+Melenchon/
 build/
 develop-eggs/
 dist/
@@ -129,3 +131,4 @@ dmypy.json
 .pyre/
 
 .vscode
+

@@ -10,9 +10,7 @@ import yaml
 
 from database_inserter import DatabaseInserter
 
-
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-
 
 KEYS_FROM_JSON=['title','duration','channel','view_count','average_rating','upload_date','fulltitle','tags','categories','playlist','playlist_title']
 
@@ -38,8 +36,6 @@ def getCleanedContent(content:str)->str:
             clean=clean+subparts[1]
     return clean
 
-
-
 class InputReader:
     def __init__(self,yaml_input_file):
         if (not os.path.isfile(yaml_input_file)):
@@ -48,10 +44,12 @@ class InputReader:
             self.data=yaml.safe_load(stream)
             
 class VideoDataExtractor:
-    def __init__(self, video_id,query_url):
+    def __init__(self, video_id,query_url,personality_name):
         self.data=initializeData()
         self.data['video_id']=video_id
         self.data['query_url']=query_url
+        self.data['personality_name'] = personality_name
+        
         self.__parse(video_id)
 
     def getData(self)->dict: 
@@ -90,7 +88,6 @@ class VideoDataExtractor:
         all_files = [f for f in listdir(os.getcwd()) if isfile(join(os.getcwd(), f))]
         for filename in all_files:
             if video_id in filename and ".fr.vtt" in filename :
-                self.data['personality_name']=filename.rstrip(f'-{video_id}.fr.vtt')
                 json_filename=filename.rstrip('.fr.vtt')+'.info.json'
                 description_filename=filename.rstrip('.fr.vtt')+'.description'
                 self.__parse_json_file(json_filename)
@@ -100,8 +97,6 @@ class VideoDataExtractor:
                     if (os.path.isfile(full_file_path)):
                         os.remove(full_file_path)
                 break
-
-
 
 class Source:
     def __init__(self, personality_name=str, channel_url=str):
@@ -117,7 +112,7 @@ class Source:
         extracted_metadata=list()
         for video_id in self.list_newly_download_id():
             print(f"Extracting information for video id: {video_id}")
-            extractor = VideoDataExtractor(video_id,self.channel_url)
+            extractor = VideoDataExtractor(video_id,self.channel_url, self.personality_name)
             extracted_metadata.append(extractor.getData())
             print (f"Video was from {extracted_metadata[-1]['personality_name']}")
 
@@ -164,7 +159,6 @@ class Source:
         spc.communicate()
         spc.wait()
 
-
 def main():
     database_inserter=DatabaseInserter()
     parser = argparse.ArgumentParser(description="Get metadata from youtube video and insert them into the database")
@@ -173,6 +167,8 @@ def main():
     input = InputReader(args.input[0])
     for key in input.data:
         for url in input.data[key]:
+            print('------'*20)
+            print(key,url)
             source = Source(key, url)
             extracted_metadata=source.proceed()
             for metadata in extracted_metadata:
