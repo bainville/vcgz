@@ -3,52 +3,13 @@ import dash
 from dash import dcc
 from dash import html, dash_table
 from dash.dependencies import Input, Output
+from vcgz.web_dashboard.utils import *
 import pandas as pd
 pd.options.plotting.backend = "plotly"
 import plotly.express as px
 import random
 
-
 #fig = px.line(x=df_by_subject.europe.resample('W').sum().rolling(3).apply(z_score).index, y=df_by_subject.europe.resample('W').sum().rolling(3).apply(z_score), title="sample figure", height=325)
-
-all_subjects = {}
-all_subjects['démocratie'] = ['constituante', 'référendum','révolution citoyenne','révolutions','vote obligatoire','électorale','réforme','groupe parlementaire']
-all_subjects['education'] = ['enseignement professionnel','enseignement','apprentissage','acquis','lire','écrire','compter']
-all_subjects['justice'] = ['justice','impunité','greffier','magistrat','peines planchers','place de prison','majorité pénale','multirécidiviste']
-all_subjects['economie'] = ['dette','milieux populaires','précarité','protectionnisme','lutte travailleurs','retraite']
-all_subjects['agriculture'] = ['élévage','élevage intensif']
-all_subjects['ecologie'] = ['mer','écologie','environement']
-all_subjects['outre_mer'] = ['outre mer', 'antilles','guadeloupéens','martiniquais','eau potable','assainissement','chlordécone','haïti','calédonie','territoires insulaires',
- 'caraïbes']
-all_subjects['ruralité'] = [ 'campagnes','monde rural']
-all_subjects['europe'] = ['parlement européen','europe','éuropéene']
-all_subjects['immigration'] = ['immigration', 'immigrés','nationalité','expulser']
-all_subjects['identité'] = ['islam','créolisation', 'quartiers populaires','fachos','musulmans','quartiers','civilisation','culture', 'être français','racisme','francophonie','française']
-all_subjects['sécurité']= ['crime','délit','délinquance','prison']
-all_subjects['lutte_contre_la_fraude'] = ['paradis fiscaux','évasion fiscale','fiscale','fraude sociale']
-all_subjects['santé'] = ['dose','gestes barrières','soignants','tests gratuits','couvre feu','confinement','pandémie','ars','ephad','maison de retraite']
-all_subjects['international'] = ['ukraine','russie','venezuela','états unis','pékin', 'chine', 'taïwan', 'russes']
-
-def prepare_data_by_people(people):
-    df = pd.read_excel("C:/Users/isaac/Documents/vcgz/web_dashboard/All_Corpus_Punct_" + people + ".xlsx",index_col=0)
-    df_by_subject = df.set_index('upload_date')[['Text_of_punctuation']]
-    for key in all_subjects.keys():
-        df_by_subject[key] = df_by_subject.Text_of_punctuation.apply(lambda win:sum([str(win).lower().count(i) for i in all_subjects[key]]))
-    df_to_plot = df_by_subject.resample('W-SAT').sum()
-    df_to_plot.columns = [i.title() for i in df_to_plot.columns ]
-    df_to_plot.columns.name='Topics'
-    return df_to_plot
-
-
-def prepare_data():
-    print('We are loading data')
-    res = {}
-    for people in ['Melenchon','Macron','Zemmour','LePen']:
-        df_to_plot = prepare_data_by_people(people)
-        res[people]  = df_to_plot
-    all_res = pd.concat(res,axis=1)
-    return all_res
-
 
 app = dash.Dash(__name__)
 df = prepare_data()
@@ -111,7 +72,8 @@ def read_excel_and_send_fig(value,tab):
     if value is None:
         return None, None, None
     if tab == 'tab-1-example-graph':
-        df_to_plot = df.xs(value,level=0,axis=1)
+        df_to_plot = df.xs(value,level=1,axis=1).dropna(how='all')
+        df_to_plot.columns.name = 'Topics'
 
         fig = df_to_plot.plot(kind='bar',
                               labels={"value":"Nombre d'occurence","upload_date":"Semaine"},
@@ -149,7 +111,8 @@ def read_excel_and_send_fig(value,tab):
                                                     }]
     ,) ])
     elif tab == 'tab-2-example-graph':
-        df_to_plot = df.xs(value.title(),level=1,axis=1)
+        df_to_plot = df.xs(value,level=0,axis=1).dropna(how="all")
+        df_to_plot.columns.name = 'Candidat'
 
         fig = df_to_plot.plot(kind='bar',
                               labels={"value":"Nombre d'occurence","upload_date":"Semaine"},
