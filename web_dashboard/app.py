@@ -37,7 +37,8 @@ app.layout = html.Div(
 df = prepare_data()
 all_subjects_df = pd.DataFrame.from_dict(all_subjects,orient='index').T
 
-@app.callback(output=[dash.dependencies.Output('my-dropdown', 'options')],
+
+@app.callback(output=dash.dependencies.Output('my-dropdown', 'options'),
               inputs=[Input('tabs_groupby', 'value')])
 def change_my_dropdown_options(tab):
     if tab == 'by_candidates':
@@ -153,4 +154,4 @@ def send_fig(value,tab):
  
 
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run_server(debug=False)
