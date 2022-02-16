@@ -26,16 +26,6 @@ all_subjects['international'] = ['ukraine','russie','venezuela','états unis','p
 
 
 
-def prepare_data_by_people(people):
-    df = pd.read_excel("C:/Users/isaac/Documents/vcgz/web_dashboard/All_Corpus_Punct_" + people + ".xlsx",index_col=0)
-    df_by_subject = df.set_index('upload_date')[['Text_of_punctuation']]
-    for key in all_subjects.keys():
-        df_by_subject[key] = df_by_subject.Text_of_punctuation.apply(lambda win:sum([str(win).lower().count(i) for i in all_subjects[key]]))
-    df_to_plot = df_by_subject.resample('W-SAT').sum()
-    df_to_plot.columns = [i.title() for i in df_to_plot.columns ]
-    df_to_plot.columns.name='Topics'
-    return df_to_plot
-
 def download_database_specific_field(myclient, name_of_database, name_of_collection, list_of_field, with_id=False, filter={}):
     dict_of_field = {i: 1 for i in list_of_field}
     if with_id:
@@ -45,6 +35,19 @@ def download_database_specific_field(myclient, name_of_database, name_of_collect
     mydb = myclient[name_of_database]
     collection = mydb[name_of_collection]
     df_temp = pd.DataFrame(list(collection.find(filter, dict_of_field)))
+    return df_temp
+
+def download_database(myclient, name_of_database, name_of_collection, name_of_date_columns=[], with_id=False):
+    mydb = myclient[name_of_database]
+    collection = mydb[name_of_collection]
+    if with_id:
+        df_temp = pd.DataFrame(list(collection.find({})))
+    else:
+        df_temp = pd.DataFrame(list(collection.find({}, {'_id': 0})))
+
+    for date_column in name_of_date_columns:
+        df_temp[date_column] = pd.to_datetime(df_temp[date_column], unit='ms')
+
     return df_temp
 
 def prepare_data():

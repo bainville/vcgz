@@ -20,9 +20,9 @@ app.layout = html.Div(
     
     html.H1(children="Analyse des tendances de la présidentielle", style = {'textAlign': 'center'}),
     
-    dcc.Tabs(id="tabs-example-graph", value='tab-1-example-graph', children=[
-        dcc.Tab(label='By candidates', value='tab-1-example-graph'),
-        dcc.Tab(label='By topics', value='tab-2-example-graph'),
+    dcc.Tabs(id="tabs_groupby", value='by_candidates', children=[
+        dcc.Tab(label='By candidates', value='by_candidates'),
+        dcc.Tab(label='By topics', value='by_topics'),
     ]),   
     dcc.Dropdown(
             id='my-dropdown',
@@ -33,21 +33,21 @@ app.layout = html.Div(
                 children=[html.Div([html.Div(id="loading-output")])],
                 type="default",
             ),
-    html.Div(id='tabs-content-example-graph'),
-    html.Div(id='tabs-content-example-table')
+    html.Div(id='result_graph'),
+    html.Div(id='result_table')
 ])
 
 
 @app.callback(output=dash.dependencies.Output('my-dropdown', 'options'),
-              inputs=[Input('tabs-example-graph', 'value')])
+              inputs=[Input('tabs_groupby', 'value')])
 def change_my_dropdown_options(tab):
-    if tab == 'tab-1-example-graph':
+    if tab == 'by_candidates':
         return [{'label': 'Melenchon', 'value': 'Melenchon'},
                 {'label': 'Macron', 'value': 'Macron'},
                 {'label': 'Zemmour', 'value': 'Zemmour'},
                 {'label': 'Le Pen', 'value': 'LePen'},
                 {'label': 'Pecresse', 'value': 'Pecresse'}]
-    elif tab == 'tab-2-example-graph':
+    elif tab == 'by_topics':
          return [{'label': 'Démocratie', 'value': 'démocratie'},
                 {'label': 'Education', 'value': 'education'},
                 {'label': 'Justice', 'value': 'justice'},
@@ -64,14 +64,16 @@ def change_my_dropdown_options(tab):
                 {'label': 'Santé', 'value': 'santé'},
                 {'label': 'International', 'value': 'international'}]
         
-@app.callback(
-    [Output('tabs-content-example-graph', 'children'),Output("loading-output", "children"),Output('tabs-content-example-table', 'children')],
-    [Input('my-dropdown', 'value'),Input('tabs-example-graph', 'value')]
+@app.callback([Output('result_graph', 'children'),
+               Output("loading-output", "children"),
+               Output('result_table', 'children')],
+               [Input('my-dropdown', 'value'),
+               Input('tabs_groupby', 'value')]
 )
 def read_excel_and_send_fig(value,tab):
     if value is None:
         return None, None, None
-    if tab == 'tab-1-example-graph':
+    if tab == 'by_candidates':
         df_to_plot = df.xs(value,level=1,axis=1).dropna(how='all')
         df_to_plot.columns.name = 'Topics'
 
@@ -110,7 +112,7 @@ def read_excel_and_send_fig(value,tab):
                                                 'backgroundColor': 'rgb(220, 220, 220)',
                                                     }]
     ,) ])
-    elif tab == 'tab-2-example-graph':
+    elif tab == 'by_topics':
         df_to_plot = df.xs(value,level=0,axis=1).dropna(how="all")
         df_to_plot.columns.name = 'Candidat'
 

@@ -9,7 +9,7 @@ __pycache__/
 # Distribution / packaging
 .Python
 Zemmour/
-Melenchon/
+web_dashboard/dash_env/
 build/
 develop-eggs/
 dist/
