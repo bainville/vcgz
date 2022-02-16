@@ -12,9 +12,6 @@ import random
 #fig = px.line(x=df_by_subject.europe.resample('W').sum().rolling(3).apply(z_score).index, y=df_by_subject.europe.resample('W').sum().rolling(3).apply(z_score), title="sample figure", height=325)
 
 app = dash.Dash(__name__)
-df = prepare_data()
-all_subjects_df = pd.DataFrame.from_dict(all_subjects,orient='index').T
-
 app.layout = html.Div(
     children = [
     
@@ -37,8 +34,10 @@ app.layout = html.Div(
     html.Div(id='result_table')
 ])
 
+df = prepare_data()
+all_subjects_df = pd.DataFrame.from_dict(all_subjects,orient='index').T
 
-@app.callback(output=dash.dependencies.Output('my-dropdown', 'options'),
+@app.callback(output=[dash.dependencies.Output('my-dropdown', 'options')],
               inputs=[Input('tabs_groupby', 'value')])
 def change_my_dropdown_options(tab):
     if tab == 'by_candidates':
@@ -70,7 +69,7 @@ def change_my_dropdown_options(tab):
                [Input('my-dropdown', 'value'),
                Input('tabs_groupby', 'value')]
 )
-def read_excel_and_send_fig(value,tab):
+def send_fig(value,tab):
     if value is None:
         return None, None, None
     if tab == 'by_candidates':
