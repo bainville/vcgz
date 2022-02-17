@@ -10,5 +10,8 @@ class DatabaseInserter:
         self.data_table=self.database['video_subtitles']
     
     def insertVideoRecord(self,video_metadata:dict):
-        self.data_table.insert_one(video_metadata)
+        if len(list(self.data_table.find({'video_id':video_metadata['video_id']})))==0:
+            self.data_table.insert_one(video_metadata)
+        else:
+            print('We have already '+video_metadata['video_id'])
         

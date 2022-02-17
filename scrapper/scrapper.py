@@ -85,15 +85,15 @@ class VideoDataExtractor:
         self.data['subtitle']=subtitle
 
     def __parse(self, video_id: str):
-        all_files = [f for f in listdir(os.getcwd()) if isfile(join(os.getcwd(), f))]
+        all_files = [f for f in listdir(os.getcwd() + "/data/") if isfile(join(os.getcwd() + "/data/", f))]
         for filename in all_files:
             if video_id in filename and ".fr.vtt" in filename :
-                json_filename=filename.rstrip('.fr.vtt')+'.info.json'
-                description_filename=filename.rstrip('.fr.vtt')+'.description'
+                json_filename="data/"+filename.rstrip('.fr.vtt')+'.info.json'
+                description_filename="data/"+filename.rstrip('.fr.vtt')+'.description'
                 self.__parse_json_file(json_filename)
-                self.__parse_subtitle(filename)
+                self.__parse_subtitle("data/"+filename)
                 for f in [description_filename,json_filename,filename]:
-                    full_file_path=os.path.join(os.getcwd(),f)
+                    full_file_path=os.path.join(os.getcwd() + "/data/",f)
                     if (os.path.isfile(full_file_path)):
                         os.remove(full_file_path)
                 break
@@ -121,8 +121,8 @@ class Source:
     def list_newly_download_id(self):
         all_files = [
             filename
-            for filename in listdir(os.getcwd())
-            if isfile(join(os.getcwd(), filename))
+            for filename in listdir(os.getcwd() + "/data/")
+            if isfile(join(os.getcwd() + "/data/", filename))
         ]
         only_file_for_this_personality = [
             filename for filename in all_files if (self.personality_name in filename)
@@ -132,22 +132,27 @@ class Source:
             for filename in only_file_for_this_personality
             if (".vtt" in filename)
         ]
+        print('We have '+ str(len(only_ids)) + ' for '+self.personality_name)
         return only_ids
 
     def get_all_video_in_channel(self):
         command = [
             "youtube-dl",
             "--skip-download",
+            "--write-sub",
+            "--write-auto-sub",
+            "--write-info-json",
             "--write-annotations",
             "--write-description",
-            "--write-info-json",
             "--no-overwrite",
+            "--no-warnings",
+            "--ignore-errors",
+            "--console-title",
+            "--age-limit=18",
             "--download-archive",
-            "--write-info-json",
-            "--write-auto-sub",
             "--sub-lang=fr",
             "--output",
-            f"{self.personality_name}-%(id)s",
+            f"data/{self.personality_name}-%(id)s",
             self.channel_url,
         ]
         print(" ".join(command))

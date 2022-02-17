@@ -8,7 +8,7 @@ __pycache__/
 
 # Distribution / packaging
 .Python
-Zemmour/
+data/
 web_dashboard/dash_env/
 build/
 develop-eggs/
