@@ -69,7 +69,7 @@ class VideoDataExtractor:
         line=str()
         one_line_before=str()
         two_line_before=str()
-        content = [content_line.rstrip('\n').rstrip(" ") for content_line in open(subtitle_filename)]
+        content = [content_line.rstrip('\n').rstrip(" ") for content_line in open(subtitle_filename, encoding='utf-8')]
         for content_line in content[3:]:
             two_line_before=one_line_before
             one_line_before=line
@@ -141,6 +141,7 @@ class Source:
             "--skip-download",
             "--write-sub",
             "--write-auto-sub",
+            "--sub-lang=fr",
             "--write-info-json",
             "--write-annotations",
             "--write-description",
@@ -148,9 +149,10 @@ class Source:
             "--no-warnings",
             "--ignore-errors",
             "--console-title",
-            "--age-limit=18",
             "--download-archive",
-            "--sub-lang=fr",
+            
+            "--age-limit=18",
+            
             "--output",
             f"data/{self.personality_name}-%(id)s",
             self.channel_url,
