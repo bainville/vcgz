@@ -150,12 +150,11 @@ class Source:
             "--ignore-errors",
             "--console-title",
             "--download-archive",
-            
             "--age-limit=18",
-            
             "--output",
             f"data/{self.personality_name}-%(id)s",
             self.channel_url,
+            "--dateafter=20220101"
         ]
         print(" ".join(command))
 
@@ -173,13 +172,15 @@ def main():
     args = parser.parse_args()
     input = InputReader(args.input[0])
     for key in input.data:
+        compteur = 0
         for url in input.data[key]:
             print('------'*20)
             print(key,url)
             source = Source(key, url)
             extracted_metadata=source.proceed()
             for metadata in extracted_metadata:
-                database_inserter.insertVideoRecord(metadata)
+                compteur += database_inserter.insertVideoRecord(metadata)
+        print("We add " +str(compteur)+ " videos for "+key)
 
 if __name__ == "__main__":
     main()
