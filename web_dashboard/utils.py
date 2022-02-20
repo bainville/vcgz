@@ -50,6 +50,11 @@ def download_database(myclient, name_of_database, name_of_collection, name_of_da
 
     return df_temp
 
+def download_database_specific_date(myclient, name_of_database, name_of_collection, date_start, filter = {}, list_of_field = []):
+    filter["upload_date"]= {"$gte": date_start}
+    result = pd.DataFrame(list(myclient[name_of_database][name_of_collection].find(filter)))
+    return result
+
 def prepare_data():
     print('We are loading data')
     df = download_database_specific_field(client,'recorded_video','video_subtitles',['subtitle','upload_date','personality_name'])
@@ -63,3 +68,45 @@ def prepare_data():
     df_resultats = df_resultats.mask(df_resultats==0).resample('W-SAT').sum(min_count=1)
     print('Data is ready!')
     return df_resultats
+
+
+def prepare_intro_data():
+    df = download_database_specific_date(client,'recorded_video','video_subtitles', list_of_field = ['upload_date' ],date_start='20220101')
+    df['upload_date'] = pd.to_datetime(df.upload_date,format='%Y%m%d')
+    df = df.set_index('upload_date')
+    a  = df.groupby('personality_name').apply(lambda win:win.resample('W-SAT',label='left',closed='left').sum(min_count=1))
+    b =  df.groupby('personality_name').apply(lambda win:win.resample('W-SAT',label='left',closed='left').count())[['_id']]
+    c = pd.merge(a,b,left_index=True,right_index=True)
+    c.duration = (c.duration/60).apply(int)
+    c.columns = ["Nb de minutes","Vues",'Nombre de videos']
+    c.index.names = ['Candidat','Debut de semaine']
+    c = c[['Nombre de videos', "Nb de minutes","Vues"]]
+    c = c.reset_index()
+    c.loc[c['Candidat'].duplicated(), 'Candidat'] = ''
+    return c
+
+
+def datatable_settings_multiindex(df, flatten_char = '_'):
+    ''' Plotly dash datatables do not natively handle multiindex dataframes. This function takes a multiindex column set
+    and generates a flattend column name list for the dataframe, while also structuring the table dictionary to represent the
+    columns in their original multi-level format.  
+    
+    Function returns the variables datatable_col_list, datatable_data for the columns and data parameters of 
+    the dash_table.DataTable'''
+    datatable_col_list = []
+        
+    levels = df.columns.nlevels
+    if levels == 1:
+        for i in df.columns:
+            datatable_col_list.append({"name": i, "id": i})
+    else:        
+        columns_list = []
+        for i in df.columns:
+            col_id = flatten_char.join(i)
+            datatable_col_list.append({"name": i, "id": col_id})
+            columns_list.append(col_id)
+        df.columns = columns_list
+
+    datatable_data = df.to_dict('records')
+    
+    return datatable_col_list, datatable_data

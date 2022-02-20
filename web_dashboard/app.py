@@ -11,12 +11,41 @@ import random
 
 #fig = px.line(x=df_by_subject.europe.resample('W').sum().rolling(3).apply(z_score).index, y=df_by_subject.europe.resample('W').sum().rolling(3).apply(z_score), title="sample figure", height=325)
 
+#df = prepare_data()
+df_intro = prepare_intro_data()
+all_subjects_df = pd.DataFrame.from_dict(all_subjects,orient='index').T
+
 app = dash.Dash(__name__)
 app.layout = html.Div(
     children = [
     
     html.H1(children="Analyse des tendances de la présidentielle", style = {'textAlign': 'center'}),
-    
+    html.H3(children="Videos suivis", style = {'textAlign': 'center'}),
+  
+
+    html.Div([html.H3('Videos suivis', style = {'textAlign': 'center'}),
+                dash_table.DataTable(data = df_intro.to_dict(orient='records'),
+                         columns =  [{"id": i ,'name':i} for i in df_intro.columns],
+                         id='tbl',
+                         style_cell={'textAlign': 'center',
+                                     'whiteSpace': 'normal',
+                                     'height': 'auto'},
+                         style_table={'overflowX': 'auto'},
+                         style_header={
+                                       'backgroundColor': '#F35330',
+                                       'fontWeight': 'bold',
+                                       'border': '2px solid green'
+                                      },
+                         style_data_conditional=[{
+                                                'if': {'row_index': 'odd'},
+                                                'backgroundColor': 'rgb(220, 220, 220)',
+                                                    }]
+                                                    ,) ]),
+
+
+
+
+    html.H3(children="Tendances", style = {'textAlign': 'center'}),
     dcc.Tabs(id="tabs_groupby", value='by_candidates', children=[
         dcc.Tab(label='By candidates', value='by_candidates'),
         dcc.Tab(label='By topics', value='by_topics'),
@@ -33,9 +62,6 @@ app.layout = html.Div(
     html.Div(id='result_graph'),
     html.Div(id='result_table')
 ])
-
-df = prepare_data()
-all_subjects_df = pd.DataFrame.from_dict(all_subjects,orient='index').T
 
 
 @app.callback(output=dash.dependencies.Output('my-dropdown', 'options'),
@@ -154,4 +180,4 @@ def send_fig(value,tab):
  
 
 if __name__ == "__main__":
-    app.run_server(debug=False)
+    app.run_server(debug=True)
