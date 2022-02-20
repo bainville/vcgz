@@ -11,6 +11,7 @@ __pycache__/
 data/
 web_dashboard/dash_env/
 build/
+web_dashboard/dash_env/
 develop-eggs/
 dist/
 downloads/

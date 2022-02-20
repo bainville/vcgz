@@ -3,7 +3,7 @@ import dash
 from dash import dcc
 from dash import html, dash_table
 from dash.dependencies import Input, Output
-from vcgz.web_dashboard.utils import *
+from utils import *
 import pandas as pd
 pd.options.plotting.backend = "plotly"
 import plotly.express as px
