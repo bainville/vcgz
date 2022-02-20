@@ -8,6 +8,8 @@ __pycache__/
 
 # Distribution / packaging
 .Python
+data/
+web_dashboard/dash_env/
 build/
 web_dashboard/dash_env/
 develop-eggs/
@@ -128,3 +130,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+.vscode
+
