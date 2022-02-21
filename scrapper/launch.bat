@@ -1,1 +1,1 @@
-dash_env\Scripts\python app.py
+python scrapper.py
