@@ -37,6 +37,7 @@ def download_database(myclient, name_of_database, name_of_collection, list_of_fi
     df_temp = pd.DataFrame(list(collection.find(filter, dict_of_field)))
     return df_temp
 
+
 def prepare_topics_data():
     print('Loading data for topics')
     df = download_database(client,'recorded_video','video_subtitles',list_of_field = ['subtitle','upload_date','personality_name'])
@@ -70,6 +71,7 @@ def prepare_intro_data():
     c['Debut de semaine'] = c['Debut de semaine'].dt.strftime('%d-%m-%Y')
     c = c[['Candidat', 'Debut de semaine', 'Fin de Semaine','Nombre de videos', 'Nb de minutes','Vues']]
     return c
+
 
 def last_date_of_video():
     df = download_database(client,'recorded_video','video_subtitles',list_of_field = ['upload_date'], date_start='20220201')

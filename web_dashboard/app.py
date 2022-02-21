@@ -187,7 +187,7 @@ def send_fig(value,tab):
 def send_intro_table(n):
     def make_clickable(val):
         return "<a href='{0}' target='_blank'>{0}</a>".format(val)
-    with open('C:/Users/isaac/Documents/vcgz/scrapper/input.yaml', 'r') as stream:
+    with open('input.yaml', 'r') as stream:
         input_data = pd.DataFrame(yaml.safe_load(stream),index=['Link']).T.reset_index()
     input_data['Link'] = input_data['Link'].apply(make_clickable)
     input_data.columns = ['Candidat','Lien']
