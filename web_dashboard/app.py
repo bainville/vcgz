@@ -151,7 +151,8 @@ def send_fig(value,tab):
                                 "display": "block",
                                 "margin-left": "auto",
                                 "margin-right": "auto",
-                                })
+                                }),
+                html.P('(Last value is partial)', style = {'textAlign': 'center'}),
             ])
         return res_layout, None, topics_word_layout
     elif tab == 'by_topics':
