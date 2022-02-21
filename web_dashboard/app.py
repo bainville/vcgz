@@ -153,7 +153,7 @@ def send_fig(value,tab):
                                 "margin-left": "auto",
                                 "margin-right": "auto",
                                 }),
-                html.P("(La dernière valeur peut être partiel puisque la semaine n'est pas fini)", style = {'textAlign': 'center','font-style': 'italic'})
+                html.P("(La dernière valeur peut être partiel puisque la dernière semaine peut ne pas être fini)", style = {'textAlign': 'center','font-style': 'italic'})
             ])
         return res_layout, None, topics_word_layout
     elif tab == 'by_topics':
@@ -176,7 +176,7 @@ def send_fig(value,tab):
                                 "margin-left": "auto",
                                 "margin-right": "auto",
                                 }),
-                html.P("(La dernière valeur peut être partiel puisque la semaine n'est pas fini)", style = {'textAlign': 'center','font-style': 'italic'})
+                html.P("(La dernière valeur peut être partiel puisque la dernière semaine peut ne pas être fini)", style = {'textAlign': 'center','font-style': 'italic'})
                             ])
         return res_layout, None, topics_word_layout
  
