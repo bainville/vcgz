@@ -28,6 +28,7 @@ app.layout = html.Div([
     html.Div(id='page-content'),
 ])
 
+
 index_layout = html.Div([   
     html.Br(),
     html.P(children= 'Voici un récapitulatif de toutes les vidéos suivis', style = {'textAlign': 'center'}),
