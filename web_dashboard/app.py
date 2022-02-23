@@ -21,6 +21,7 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets,suppress_cal
 app.layout = html.Div([
     dcc.Link(html.Button('Accueil'), href='/'),
     dcc.Link(html.Button('Tendances'), href='/topics'),
+    dcc.Link(html.Button('Résumé'), href='/summary'),
     html.H1(children="Analyse des tendances de la présidentielle", style = {'textAlign': 'center'}),
     html.P(id= 'time'),
     dcc.Interval(id='interval-component',interval= 5*3600*1000, n_intervals=0, disabled=False),
@@ -61,12 +62,35 @@ topics_layout = html.Div(
 ])
 
 
+summary_layout =  html.Div(
+    children = [   
+
+        html.Div([dcc.Dropdown(
+            id='dropdown_candidat',
+            options=[{'label': 'Melenchon', 'value': 'Melenchon'},
+                {'label': 'Macron', 'value': 'Macron'},
+                {'label': 'Zemmour', 'value': 'Zemmour'},
+                {'label': 'Le Pen', 'value': 'LePen'},
+                {'label': 'Pecresse', 'value': 'Pecresse'}
+                ])],
+            className="six columns"),
+        html.Div([dcc.Dropdown(
+            id='dropdown_video',
+            options=[]
+                )],
+            className="six columns"),
+])
+
+
+
 # Update the index
 @app.callback(Output('page-content', 'children'),
               [Input('url', 'pathname')])
 def display_page(pathname):
     if pathname == '/topics':
         return topics_layout
+    elif pathname == '/summary':
+        return summary_layout
     else:
         return index_layout
 
@@ -181,7 +205,6 @@ def send_fig(value,tab):
         return res_layout, None, topics_word_layout
  
 
-
 @app.callback(Output('intro_table','children'),
               Input('interval-component', 'n_intervals'))
 def send_intro_table(n):
@@ -230,6 +253,15 @@ def send_intro_table(n):
 
     return res_html
 
+
+@app.callback(
+    Output(component_id='dropdown_video', component_property='options'),
+    [Input(component_id='dropdown_candidat', component_property='value')]
+)
+def update_dp(value_candidat):
+    df = download_database(client,'recorded_video','video_subtitles',list_of_field = ['title','video_id'],filter={'personality_name':value_candidat})
+    res = [{'label':df.title.iloc[i],'value':df.video_id.iloc[i] } for i in range(len(df))]
+    return res
 
 if __name__ == "__main__":
     app.run_server(debug=True)

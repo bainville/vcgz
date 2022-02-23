@@ -2,7 +2,7 @@ import pymongo
 import urllib
 import pandas as pd
 from datetime import timedelta
-from dict_of_words import * 
+from vcgz.web_dashboard.dict_of_words import * 
 
 password="HASI0KjXi@hk1uTUV&9T8u6q0C52VqD2h?c#goH0"
 client= pymongo.MongoClient(f"mongodb+srv://vcgz_admin:"+urllib.parse.quote(password)+"@veilleconcurentielle.zfgil.mongodb.net/vcdataout?retryWrites=true&w=majority")
