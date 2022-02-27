@@ -61,7 +61,7 @@ def prepare_intro_data():
     a  = df.groupby('personality_name').apply(lambda win:win.resample('W-SAT',label='left',closed='left').sum(min_count=1))
     b =  df.groupby('personality_name').apply(lambda win:win.resample('W-SAT',label='left',closed='left').count())[['_id']]
     c = pd.merge(a,b,left_index=True,right_index=True)
-    c.duration = (c.duration/60).apply(int)
+    c.duration = (c.duration.fillna(0)/60).apply(int)
     c.columns = ["Nb de minutes","Vues",'Nombre de videos']
     c.index.names = ['Candidat','Debut de semaine']
     c = c[['Nombre de videos', "Nb de minutes","Vues"]]

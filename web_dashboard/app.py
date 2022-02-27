@@ -79,6 +79,7 @@ summary_layout =  html.Div(
             options=[]
                 )],
             className="six columns"),
+        html.Div(id='result_summary')
 ])
 
 
@@ -260,8 +261,21 @@ def send_intro_table(n):
 )
 def update_dp(value_candidat):
     df = download_database(client,'recorded_video','video_subtitles',list_of_field = ['title','video_id'],filter={'personality_name':value_candidat})
+    df = df.iloc[::-1]
     res = [{'label':df.title.iloc[i],'value':df.video_id.iloc[i] } for i in range(len(df))]
     return res
+
+
+@app.callback(
+    Output('result_summary', 'children'),
+    [Input(component_id='dropdown_video', component_property='value')]
+)
+def return_summary(video_id):
+    print(video_id)
+    df = download_database(client,'recorded_video','video_subtitles',list_of_field = ['subtitle','subtitle_with_punct'],filter={'video_id':video_id})
+    res = html.P(df.subtitle_with_punct.iloc[0], style = {'textAlign': 'center','font-style': 'italic'})
+    return res
+
 
 if __name__ == "__main__":
     app.run_server(debug=True)
