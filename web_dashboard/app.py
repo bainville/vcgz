@@ -79,6 +79,8 @@ summary_layout =  html.Div(
             options=[]
                 )],
             className="six columns"),
+        html.Br(),
+        html.Br(),
         html.Div(id='result_summary')
 ])
 
@@ -100,11 +102,11 @@ def display_page(pathname):
               Input('interval-component', 'n_intervals'))
 def update_data(n):
     print('Dernière mise à jour: ' + str(datetime.now()))
-    print(n)
-    global df_intro
-    df_intro = prepare_intro_data()
-    global df
-    df = prepare_topics_data()
+    # print(n)
+    # global df_intro
+    # df_intro = prepare_intro_data()
+    # global df
+    # df = prepare_topics_data()
     last_date = last_date_of_video()
     return [html.Div(['Dernière mise à jour du back: ' + datetime.now().strftime('%H:%M %d-%m-%Y') ,html.Br(), 'Date de la dernière vidéo: '+last_date])]
 
@@ -271,9 +273,34 @@ def update_dp(value_candidat):
     [Input(component_id='dropdown_video', component_property='value')]
 )
 def return_summary(video_id):
-    print(video_id)
-    df = download_database(client,'recorded_video','video_subtitles',list_of_field = ['subtitle','subtitle_with_punct'],filter={'video_id':video_id})
-    res = html.P(df.subtitle_with_punct.iloc[0], style = {'textAlign': 'center','font-style': 'italic'})
+    df = download_database(client,'recorded_video','video_subtitles',list_of_field = ['subtitle','subtitle_with_punct','summary'],filter={'video_id':video_id})
+    res = html.Div([
+        html.H3(children="Résumé", style = {'textAlign': 'center'}),
+        html.Div(html.P(df.summary.iloc[0], style = { 'width': '980px',
+                                                      'height': '490px'}),
+                                            style = {'textAlign': 'justify',
+                                                        "background-color": "#F8B2A2",
+                                                        'border': '1px black solid',
+                                                        "margin-left": "auto",
+                                                        "margin-right": "auto",
+                                                        'font-style': 'italic',
+                                                        'width': '1000px',
+                                                        'height': '200px',
+                                                        'overflow': 'auto'}),
+        html.Br(),
+        html.H3(children="Sous titres de la vidéo", style = {'textAlign': 'center'}),
+        html.Div(html.P(df.subtitle_with_punct.iloc[0].replace('\n','<br>'), style = { 'width': '980px',
+                                                                    'height': '490px'}),
+                                                        style = {'textAlign': 'justify',
+                                                                    "background-color": "#F9856B",
+                                                                    'border': '1px black solid',
+                                                                    "margin-left": "auto",
+                                                                    "margin-right": "auto",
+                                                                    'font-style': 'italic',
+                                                                    'width': '1000px',
+                                                                    'height': '500px',
+                                                                    'overflow': 'auto'})
+        ])
     return res
 
 

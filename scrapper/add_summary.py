@@ -74,4 +74,4 @@ df = download_database(client,'recorded_video','video_subtitles',list_of_field =
 df['chunks'] =  df['subtitle_with_punct'].progress_apply(cut_into_chunk,pipe_summarizer_nlp = pipe_summarizer_2, max_len_sentence=1024)
 for i in tqdm(range(len(df))):
     summary = generate_summary(df.chunks.iloc[i],with_device=False)
-    update_field_on_filter(client,'recorded_video','video_subtitles',{'video_id':df.video_id.iloc[i]},'summary',summary, print_df=True)                                                                                                                                    
+    update_field_on_filter(client,'recorded_video','video_subtitles',{'video_id':df.video_id.iloc[i]},'summary',summary, print_df=True) 
