@@ -18,19 +18,20 @@ df_intro = pd.DataFrame()
 all_subjects_df = pd.DataFrame.from_dict(all_subjects,orient='index').T
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets,suppress_callback_exceptions=True)
+
 app.layout = html.Div([
     dcc.Link(html.Button('Accueil'), href='/'),
     dcc.Link(html.Button('Tendances'), href='/topics'),
     dcc.Link(html.Button('Résumé'), href='/summary'),
     html.H1(children="Analyse des tendances de la présidentielle", style = {'textAlign': 'center'}),
     html.P(id= 'time'),
-    dcc.Interval(id='interval-component',interval= 5*3600*1000, n_intervals=0, disabled=False),
+    html.P(id='onload'),
     dcc.Location(id='url', refresh=False),
     html.Div(id='page-content'),
 ])
 
 
-index_layout = html.Div([   
+introduction_layout = html.Div([   
     html.Br(),
     html.P(children= 'Voici un récapitulatif de toutes les vidéos suivis', style = {'textAlign': 'center'}),
     html.Div(
@@ -88,32 +89,80 @@ summary_layout =  html.Div(
 
 # Update the index
 @app.callback(Output('page-content', 'children'),
-              [Input('url', 'pathname')])
+              Input('url', 'pathname'))
 def display_page(pathname):
     if pathname == '/topics':
         return topics_layout
     elif pathname == '/summary':
         return summary_layout
     else:
-        return index_layout
+        return introduction_layout
 
 
-@app.callback([Output('time', 'children')],
-              Input('interval-component', 'n_intervals'))
-def update_data(n):
+@app.callback(Output('time', 'children'),
+              Input('onload','children'))
+def update_data(a):
     print('Dernière mise à jour: ' + str(datetime.now()))
-    # print(n)
-    # global df_intro
-    # df_intro = prepare_intro_data()
-    # global df
-    # df = prepare_topics_data()
+    global df_intro
+    df_intro = prepare_intro_data()
+    global df
+    df = prepare_topics_data()
     last_date = last_date_of_video()
     return [html.Div(['Dernière mise à jour du back: ' + datetime.now().strftime('%H:%M %d-%m-%Y') ,html.Br(), 'Date de la dernière vidéo: '+last_date])]
 
 
-@app.callback(output=Output('dropdown_list', 'options'),
-              inputs=[Input('tabs_groupby', 'value')])
-def change_my_dropdown_options(tab):
+@app.callback(Output('intro_table','children'),
+              Input('onload','children'))
+def introduction_two_tables(n):
+    def make_clickable(val):
+        return "<a href='{0}' target='_blank'>{0}</a>".format(val)
+    with open('input.yaml', 'r') as stream:
+        input_data = pd.DataFrame(yaml.safe_load(stream),index=['Link']).T.reset_index()
+    input_data['Link'] = input_data['Link'].apply(make_clickable)
+    input_data.columns = ['Candidat','Lien']
+    table_input = html.Div([dash_table.DataTable(data = input_data.to_dict(orient='records'),
+                                    columns =  [{"id": i ,'name':i, "presentation": "markdown"} for i in input_data.columns],
+                                    id='table_input',
+                                    style_cell={'textAlign': 'center',
+                                                'whiteSpace': 'normal',
+                                                'width': '10%',
+                                                'overflow': 'hidden',
+                                                'textOverflow': 'ellipsis'},
+                                    style_table={'overflowX': 'auto',
+                                                  'width': '90%'},
+                                    style_header={'backgroundColor': '#F35330',
+                                                  'fontWeight': 'bold',
+                                                  'border': '2px solid green'},
+                                    style_data_conditional=[{'if': {'row_index': 'odd'},
+                                                            'backgroundColor': 'rgb(220, 220, 220)'}],
+                                    markdown_options={"html": True})
+                            ],className="six columns")
+
+    table_intro = html.Div([dash_table.DataTable(data = df_intro.to_dict(orient='records'),
+                                    columns =  [{"id": i ,'name':i} for i in df_intro.columns],
+                                    id='table_intro',
+                                    style_cell={'textAlign': 'center',
+                                                'whiteSpace': 'normal',
+                                                'width': '10%',
+                                                'overflow': 'hidden',
+                                                'textOverflow': 'ellipsis'},
+                                    style_table={'overflowX': 'auto',
+                                                  'width': '90%'},
+                                    style_header={'backgroundColor': '#F35330',
+                                                  'fontWeight': 'bold',
+                                                  'border': '2px solid green'},
+                                    style_data_conditional=[{'if': {'row_index': 'odd'},
+                                                            'backgroundColor': 'rgb(220, 220, 220)'}])
+                            ], className="six columns") 
+
+    res_html = html.Div(children = [table_input,table_intro])
+
+    return res_html
+
+
+@app.callback(Output('dropdown_list', 'options'),
+              Input('tabs_groupby', 'value'))
+def topics_update_dropdown_options(tab):
     if tab == 'by_candidates':
         return [{'label': 'Melenchon', 'value': 'Melenchon'},
                 {'label': 'Macron', 'value': 'Macron'},
@@ -140,7 +189,7 @@ def change_my_dropdown_options(tab):
 
 @app.callback([Output('result_graph', 'children'),Output("loading-output", "children"),Output('result_table', 'children')],
                [Input('dropdown_list', 'value'),Input('tabs_groupby', 'value')])
-def send_fig(value,tab):
+def topics_create_fig(value,tab):
     topics_word_layout = html.Div([html.H3('Mots par topics', style = {'textAlign': 'center'}),
                 dash_table.DataTable(data = all_subjects_df.to_dict(orient='records'),
                          columns =  [{"id": str(i) ,'name':i.replace('_',' ').title() } for i in all_subjects_df.columns],
@@ -208,72 +257,19 @@ def send_fig(value,tab):
         return res_layout, None, topics_word_layout
  
 
-@app.callback(Output('intro_table','children'),
-              Input('interval-component', 'n_intervals'))
-def send_intro_table(n):
-    def make_clickable(val):
-        return "<a href='{0}' target='_blank'>{0}</a>".format(val)
-    with open('input.yaml', 'r') as stream:
-        input_data = pd.DataFrame(yaml.safe_load(stream),index=['Link']).T.reset_index()
-    input_data['Link'] = input_data['Link'].apply(make_clickable)
-    input_data.columns = ['Candidat','Lien']
-    table_input = html.Div([dash_table.DataTable(data = input_data.to_dict(orient='records'),
-                                    columns =  [{"id": i ,'name':i, "presentation": "markdown"} for i in input_data.columns],
-                                    id='table_input',
-                                    style_cell={'textAlign': 'center',
-                                                'whiteSpace': 'normal',
-                                                'width': '10%',
-                                                'overflow': 'hidden',
-                                                'textOverflow': 'ellipsis'},
-                                    style_table={'overflowX': 'auto',
-                                                  'width': '90%'},
-                                    style_header={'backgroundColor': '#F35330',
-                                                  'fontWeight': 'bold',
-                                                  'border': '2px solid green'},
-                                    style_data_conditional=[{'if': {'row_index': 'odd'},
-                                                            'backgroundColor': 'rgb(220, 220, 220)'}],
-                                    markdown_options={"html": True})
-                            ],className="six columns")
-
-    table_intro = html.Div([dash_table.DataTable(data = df_intro.to_dict(orient='records'),
-                                    columns =  [{"id": i ,'name':i} for i in df_intro.columns],
-                                    id='table_intro',
-                                    style_cell={'textAlign': 'center',
-                                                'whiteSpace': 'normal',
-                                                'width': '10%',
-                                                'overflow': 'hidden',
-                                                'textOverflow': 'ellipsis'},
-                                    style_table={'overflowX': 'auto',
-                                                  'width': '90%'},
-                                    style_header={'backgroundColor': '#F35330',
-                                                  'fontWeight': 'bold',
-                                                  'border': '2px solid green'},
-                                    style_data_conditional=[{'if': {'row_index': 'odd'},
-                                                            'backgroundColor': 'rgb(220, 220, 220)'}])
-                            ], className="six columns") 
-
-    res_html = html.Div(children = [table_input,table_intro])
-
-    return res_html
-
-
-@app.callback(
-    Output(component_id='dropdown_video', component_property='options'),
-    [Input(component_id='dropdown_candidat', component_property='value')]
-)
-def update_dp(value_candidat):
+@app.callback(Output('dropdown_video', 'options'),
+              Input('dropdown_candidat', 'value'))
+def summary_update_dropdown_options(value_candidat):
     df = download_database(client,'recorded_video','video_subtitles',list_of_field = ['title','video_id'],filter={'personality_name':value_candidat})
     df = df.iloc[::-1]
     res = [{'label':df.title.iloc[i],'value':df.video_id.iloc[i] } for i in range(len(df))]
     return res
 
 
-@app.callback(
-    Output('result_summary', 'children'),
-    [Input(component_id='dropdown_video', component_property='value')]
-)
-def return_summary(video_id):
-    df = download_database(client,'recorded_video','video_subtitles',list_of_field = ['subtitle','subtitle_with_punct','summary'],filter={'video_id':video_id})
+@app.callback(Output('result_summary', 'children'),
+              Input('dropdown_video', 'value'))
+def summary_return_text(video_id):
+    df = download_database(client,'recorded_video','video_subtitles',list_of_field = ['subtitle_with_punct','summary'],filter={'video_id':video_id})
     res = html.Div([
         html.H3(children="Résumé", style = {'textAlign': 'center'}),
         html.Div(html.P(df.summary.iloc[0], style = { 'width': '980px',

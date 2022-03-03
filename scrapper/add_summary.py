@@ -64,14 +64,14 @@ def generate_summary(all_chunks,nb_by_chunks=1, with_device = True):
         all_summary = all_summary  + pipe_summarizer_2.tokenizer.batch_decode(outputs, skip_special_tokens=True) 
     return '\n\n'.join(all_summary)
 
+if __name__ == "__main__":
+    pipe_summarizer_2 = pipeline("summarization",'plguillou/t5-base-fr-sum-cnndm')
+    password="HASI0KjXi@hk1uTUV&9T8u6q0C52VqD2h?c#goH0"
+    client= pymongo.MongoClient(f"mongodb+srv://vcgz_admin:"+urllib.parse.quote(password)+"@veilleconcurentielle.zfgil.mongodb.net/vcdataout?retryWrites=true&w=majority")
+    df = download_database(client,'recorded_video','video_subtitles',list_of_field = ['subtitle','video_id','subtitle_with_punct','summary'],
+                            filter = { "subtitle_with_punct": { "$exists": True },"summary": { "$exists": False } })
 
-pipe_summarizer_2 = pipeline("summarization",'plguillou/t5-base-fr-sum-cnndm')
-password="HASI0KjXi@hk1uTUV&9T8u6q0C52VqD2h?c#goH0"
-client= pymongo.MongoClient(f"mongodb+srv://vcgz_admin:"+urllib.parse.quote(password)+"@veilleconcurentielle.zfgil.mongodb.net/vcdataout?retryWrites=true&w=majority")
-df = download_database(client,'recorded_video','video_subtitles',list_of_field = ['subtitle','video_id','subtitle_with_punct','summary'],
-                         filter = { "subtitle_with_punct": { "$exists": True },"summary": { "$exists": False } })
-
-df['chunks'] =  df['subtitle_with_punct'].progress_apply(cut_into_chunk,pipe_summarizer_nlp = pipe_summarizer_2, max_len_sentence=1024)
-for i in tqdm(range(len(df))):
-    summary = generate_summary(df.chunks.iloc[i],with_device=False)
-    update_field_on_filter(client,'recorded_video','video_subtitles',{'video_id':df.video_id.iloc[i]},'summary',summary, print_df=True) 
+    df['chunks'] =  df['subtitle_with_punct'].progress_apply(cut_into_chunk,pipe_summarizer_nlp = pipe_summarizer_2, max_len_sentence=1024)
+    for i in tqdm(range(len(df))):
+        summary = generate_summary(df.chunks.iloc[i],with_device=False)
+        update_field_on_filter(client,'recorded_video','video_subtitles',{'video_id':df.video_id.iloc[i]},'summary',summary, print_df=True) 

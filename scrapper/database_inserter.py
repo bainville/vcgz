@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import pymongo 
 import urllib
+from add_summary import update_field_on_filter
 
 class DatabaseInserter:
     def __init__(self):
@@ -14,6 +15,7 @@ class DatabaseInserter:
             self.data_table.insert_one(video_metadata)
             return 1
         else:
+            update_field_on_filter(self.client,'recorded_video','video_subtitles',{'video_id':video_metadata['video_id']},'view_count',video_metadata['view_count'], print_df=False)
             print('We have already '+video_metadata['video_id'])
             return 0
         
