@@ -8,8 +8,7 @@ import yaml
 from datetime import datetime
 import pandas as pd
 pd.options.plotting.backend = "plotly"
-import plotly.express as px
-import random
+
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 
